@@ -1,18 +1,96 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  MapPin,
-  Phone,
-  Clock,
-  MessageCircle,
-  Send,
-  CheckCircle,
-} from "lucide-react";
+import { MapPin, Phone, Clock, MessageCircle, Send, CheckCircle } from "lucide-react";
 
-import Button from "../ui/button";
-import FloatingInput from "../ui/FloatingInput";
-import FloatingTextarea from "../ui/FloatingTextarea";
+// Floating Label Input Component
+const FloatingInput = ({ label, value, onChange, type = "text", required = false, error = "" }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const hasValue = value && value.length > 0;
+  const isFloating = isFocused || hasValue;
 
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        required={required}
+        placeholder=" "
+        className={`peer w-full px-4 pt-6 pb-2 text-gray-900 bg-transparent border-2 rounded-xl focus:outline-none transition-all ${
+          error ? "border-red-500 focus:border-red-500" : "border-gray-400 focus:border-purple-600"
+        }`}
+      />
+      <label
+        className={`absolute left-3 px-1 transition-all pointer-events-none bg-white ${
+          isFloating
+            ? "-top-2.5 text-xs font-semibold"
+            : "top-4 text-base"
+        } ${error ? "text-red-500" : isFloating ? "text-purple-600" : "text-gray-700"}`}
+      >
+        {label}
+      </label>
+      {error && (
+        <p className="text-red-500 text-xs mt-1 ml-1">{error}</p>
+      )}
+    </div>
+  );
+};
+
+// Floating Label Textarea Component
+const FloatingTextarea = ({ label, value, onChange, rows = 4, error = "" }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const hasValue = value && value.length > 0;
+  const isFloating = isFocused || hasValue;
+
+  return (
+    <div className="relative">
+      <textarea
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        rows={rows}
+        placeholder=" "
+        className={`peer w-full px-4 pt-6 pb-2 text-gray-900 bg-transparent border-2 rounded-xl focus:outline-none transition-all resize-none ${
+          error ? "border-red-500 focus:border-red-500" : "border-gray-400 focus:border-purple-600"
+        }`}
+      />
+      <label
+        className={`absolute left-3 px-1 transition-all pointer-events-none bg-white ${
+          isFloating
+            ? "-top-2.5 text-xs font-semibold"
+            : "top-4 text-base"
+        } ${error ? "text-red-500" : isFloating ? "text-purple-600" : "text-gray-700"}`}
+      >
+        {label}
+      </label>
+      {error && (
+        <p className="text-red-500 text-xs mt-1 ml-1">{error}</p>
+      )}
+    </div>
+  );
+};
+
+// Button Component
+const Button = ({ children, onClick, type = "button", variant = "primary", className = "", disabled = false }) => {
+  const baseStyles = "inline-flex items-center justify-center font-semibold rounded-lg transition-all";
+  const variants = {
+    primary: "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700",
+    whatsapp: "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700",
+  };
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${baseStyles} ${variants[variant]} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      {children}
+    </button>
+  );
+};
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -21,19 +99,50 @@ export default function ContactSection() {
     email: "",
     message: "",
   });
+  const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+
+    // Phone validation
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^[6-9]\d{9}$/.test(formData.phone.trim())) {
+      newErrors.phone = "Please enter a valid 10-digit Indian mobile number";
+    }
+
+    // Email validation (optional but if provided, must be valid)
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const message = `Hi, I'm ${formData.name}.
 
 I'm interested in VR Hostels For Ladies - 2.
 
 Phone: ${formData.phone}
-Email: ${formData.email}
+Email: ${formData.email || "Not provided"}
 
-Message: ${formData.message}`;
+Message: ${formData.message || "No additional message"}`;
 
     window.open(
       `https://wa.me/917795432870?text=${encodeURIComponent(message)}`,
@@ -41,7 +150,11 @@ Message: ${formData.message}`;
     );
 
     setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setTimeout(() => {
+      setSubmitted(false);
+      setFormData({ name: "", phone: "", email: "", message: "" });
+      setErrors({});
+    }, 3000);
   };
 
   return (
@@ -51,12 +164,7 @@ Message: ${formData.message}`;
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
+        <div className="text-center mb-16">
           <span className="text-purple-600 font-semibold text-sm uppercase tracking-wider">
             Contact Us
           </span>
@@ -66,15 +174,11 @@ Message: ${formData.message}`;
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             Have questions? We'd love to hear from you.
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* LEFT: CONTACT INFO */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
+          <div>
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
               <h3 className="text-xl font-bold text-gray-900 mb-6">
                 Contact Information
@@ -83,7 +187,7 @@ Message: ${formData.message}`;
               <div className="space-y-6">
                 {/* Address */}
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
@@ -98,14 +202,14 @@ Message: ${formData.message}`;
 
                 {/* Phone */}
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Phone className="w-6 h-6 text-pink-600" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 mb-1">Phone</p>
                     <a
                       href="tel:+917795432870"
-                      className="text-purple-600 font-medium"
+                      className="text-purple-600 font-medium hover:underline"
                     >
                       +91 77954 32870
                     </a>
@@ -114,7 +218,7 @@ Message: ${formData.message}`;
 
                 {/* Timing */}
                 <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Clock className="w-6 h-6 text-orange-600" />
                   </div>
                   <div>
@@ -149,25 +253,21 @@ Message: ${formData.message}`;
               </div>
             </div>
 
-            {/* MAP (FIXED) */}
-            <div className="rounded-2xl overflow-hidden h-64 border border-gray-100">
+            {/* MAP */}
+            <div className="rounded-2xl overflow-hidden h-64 border border-gray-200 shadow-sm bg-gray-100">
               <iframe
                 title="VR Hostels Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.5847168181897!2d77.60234631482195!3d12.934799690877854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae15b1bbd50001%3A0x94ef7f98a9b2a53a!2sChrist%20University!5e0!3m2!1sen!2sin!4v1700000000000"
-                className="w-full h-full border-0"
+                src="https://maps.google.com/maps?q=12.934499690878182,77.60044631482195&z=15&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
                 loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              ></iframe>
             </div>
-          </motion.div>
+          </div>
 
-          {/* RIGHT: FORM */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
+          {/* RIGHT: FORM WITH FLOATING LABELS */}
+          <div>
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Send an Enquiry
@@ -176,45 +276,49 @@ Message: ${formData.message}`;
                 Fill out the form and we'll get back to you
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <FloatingInput
-                  id="name"
                   label="Full Name"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (errors.name) setErrors({ ...errors, name: "" });
+                  }}
                   required
+                  error={errors.name}
                 />
 
                 <FloatingInput
-                  id="phone"
                   label="Phone Number"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    setFormData({ ...formData, phone: value });
+                    if (errors.phone) setErrors({ ...errors, phone: "" });
+                  }}
                   required
+                  error={errors.phone}
                 />
 
                 <FloatingInput
-                  id="email"
                   label="Email (Optional)"
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (errors.email) setErrors({ ...errors, email: "" });
+                  }}
+                  error={errors.email}
                 />
 
                 <FloatingTextarea
-                  id="message"
                   label="Message"
                   value={formData.message}
                   onChange={(e) =>
                     setFormData({ ...formData, message: e.target.value })
                   }
+                  rows={4}
                 />
 
                 <Button
@@ -235,9 +339,8 @@ Message: ${formData.message}`;
                   )}
                 </Button>
               </form>
-
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
