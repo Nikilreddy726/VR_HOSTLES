@@ -105,7 +105,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-800 mt-10 pt-8 text-center text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} VR Hostels For Ladies – 2. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} VR Hostels For Ladies. All rights reserved.</p>
         </div>
       </div>
     </footer>
