@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 
 import Button from "../ui/button";
-import Input from "../ui/input";
-import Textarea from "../ui/textarea";
-import Label from "../ui/label";
+import FloatingInput from "../ui/FloatingInput";
+import FloatingTextarea from "../ui/FloatingTextarea";
+
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -176,51 +176,46 @@ Message: ${formData.message}`;
                 Fill out the form and we'll get back to you
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <Label>Full Name</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <FloatingInput
+                  id="name"
+                  label="Full Name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
 
-                <div>
-                  <Label>Phone Number</Label>
-                  <Input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    required
-                  />
-                </div>
+                <FloatingInput
+                  id="phone"
+                  label="Phone Number"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  required
+                />
 
-                <div>
-                  <Label>Email (Optional)</Label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-                </div>
+                <FloatingInput
+                  id="email"
+                  label="Email (Optional)"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
 
-                <div>
-                  <Label>Message</Label>
-                  <Textarea
-                    rows={4}
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                  />
-                </div>
+                <FloatingTextarea
+                  id="message"
+                  label="Message"
+                  value={formData.message}
+                  onChange={(e) =>
+                    setFormData({ ...formData, message: e.target.value })
+                  }
+                />
 
                 <Button
                   type="submit"
@@ -240,6 +235,7 @@ Message: ${formData.message}`;
                   )}
                 </Button>
               </form>
+
             </div>
           </motion.div>
         </div>
