@@ -7,9 +7,10 @@ const navLinks = [
   { name: "Home", href: "#" },
   { name: "About", href: "#about" },
   { name: "Facilities", href: "#facilities" },
-  { name: "Gallery", href: "#gallery" },
   { name: "Reviews", href: "#reviews" },
+  { name: "Gallery", href: "#gallery" },
   { name: "Contact", href: "#contact" },
+  
 ];
 
 export default function Layout({ children }) {
